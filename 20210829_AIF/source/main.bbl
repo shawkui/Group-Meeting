@@ -1,0 +1,94 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\providecommand{\bysame}{\leavevmode\hbox to3em{\hrulefill}\thinspace}
+\providecommand{\MR}{\relax\ifhmode\unskip\space\fi MR }
+% \MRhref is called by the amsart/book/proc definition of \MR.
+\providecommand{\MRhref}[2]{%
+  \href{http://www.ams.org/mathscinet-getitem?mr=#1}{#2}
+}
+\providecommand{\href}[2]{#2}
+\begin{thebibliography}{ZVGRG17}
+
+\bibitem[BCZC17]{beutel2017data}
+Alex Beutel, Jilin Chen, Zhe Zhao, and Ed~H Chi, \emph{Data decisions and
+  theoretical implications when adversarially learning fair representations},
+  arXiv preprint arXiv:1707.00075 (2017).
+
+\bibitem[CV10]{calders2010three}
+Toon Calders and Sicco Verwer, \emph{Three naive bayes approaches for
+  discrimination-free classification (accepted for publication}, In Proc.
+  ECML/PKDD, Citeseer, 2010.
+
+\bibitem[DL19]{dunkelau2019fairness}
+Jannik Dunkelau and Michael Leuschel, \emph{Fairness-aware machine learning}.
+
+\bibitem[KAAS12]{kamishima2012fairness}
+Toshihiro Kamishima, Shotaro Akaho, Hideki Asoh, and Jun Sakuma,
+  \emph{Fairness-aware classifier with prejudice remover regularizer}, Joint
+  European Conference on Machine Learning and Knowledge Discovery in Databases,
+  Springer, 2012, pp.~35--50.
+
+\bibitem[KC09]{kamiran2009classifying}
+Faisal Kamiran and Toon Calders, \emph{Classifying without discriminating},
+  2009 2nd international conference on computer, control and communication,
+  IEEE, 2009, pp.~1--6.
+
+\bibitem[KC12]{kamiran2012data}
+\bysame, \emph{Data preprocessing techniques for classification without
+  discrimination}, Knowledge and Information Systems \textbf{33} (2012), no.~1,
+  1--33.
+
+\bibitem[KJ21]{karkkainen2021fairface}
+Kimmo Karkkainen and Jungseock Joo, \emph{Fairface: Face attribute dataset for
+  balanced race, gender, and age for bias measurement and mitigation},
+  Proceedings of the IEEE/CVF Winter Conference on Applications of Computer
+  Vision, 2021, pp.~1548--1558.
+
+\bibitem[LSL{\etalchar{+}}15]{louizos2015variational}
+Christos Louizos, Kevin Swersky, Yujia Li, Max Welling, and Richard Zemel,
+  \emph{The variational fair autoencoder}, arXiv preprint arXiv:1511.00830
+  (2015).
+
+\bibitem[MMS{\etalchar{+}}21]{mehrabi2021survey}
+Ninareh Mehrabi, Fred Morstatter, Nripsuta Saxena, Kristina Lerman, and Aram
+  Galstyan, \emph{A survey on bias and fairness in machine learning}, ACM
+  Computing Surveys (CSUR) \textbf{54} (2021), no.~6, 1--35.
+
+\bibitem[PNJ{\etalchar{+}}21]{petrovic2021fair}
+Andrija Petrovi{\'c}, Mladen Nikoli{\'c}, Milo{\v{s}} Jovanovi{\'c},
+  Milo{\v{s}} Bijani{\'c}, and Boris Deliba{\v{s}}i{\'c}, \emph{Fair
+  classification via monte carlo policy gradient method}, Engineering
+  Applications of Artificial Intelligence \textbf{104} (2021), 104398.
+
+\bibitem[RKLS17]{russell2017worlds}
+Chris Russell, M~Kusner, C~Loftus, and Ricardo Silva, \emph{When worlds
+  collide: integrating different counterfactual assumptions in fairness},
+  Advances in neural information processing systems, vol.~30, NIPS Proceedings,
+  2017.
+
+\bibitem[RKR21]{ramaswamy2021fair}
+Vikram~V Ramaswamy, Sunnie~SY Kim, and Olga Russakovsky, \emph{Fair attribute
+  classification through latent space de-biasing}, Proceedings of the IEEE/CVF
+  Conference on Computer Vision and Pattern Recognition, 2021, pp.~9301--9310.
+
+\bibitem[ZD21]{zhang2021towards}
+Hongjing Zhang and Ian Davidson, \emph{Towards fair deep anomaly detection},
+  Proceedings of the 2021 ACM Conference on Fairness, Accountability, and
+  Transparency, 2021, pp.~138--148.
+
+\bibitem[ZLM18]{zhang2018mitigating}
+Brian~Hu Zhang, Blake Lemoine, and Margaret Mitchell, \emph{Mitigating unwanted
+  biases with adversarial learning}, Proceedings of the 2018 AAAI/ACM
+  Conference on AI, Ethics, and Society, 2018, pp.~335--340.
+
+\bibitem[ZVGRG17]{zafar2017fairness}
+Muhammad~Bilal Zafar, Isabel Valera, Manuel Gomez~Rodriguez, and Krishna~P
+  Gummadi, \emph{Fairness beyond disparate treatment \& disparate impact:
+  Learning classification without disparate mistreatment}, Proceedings of the
+  26th international conference on world wide web, 2017, pp.~1171--1180.
+
+\bibitem[ZVRG17]{zafar2017fairness2}
+Muhammad~Bilal Zafar, Isabel Valera, Manuel~Gomez Rogriguez, and Krishna~P
+  Gummadi, \emph{Fairness constraints: Mechanisms for fair classification},
+  Artificial Intelligence and Statistics, PMLR, 2017, pp.~962--970.
+
+\end{thebibliography}

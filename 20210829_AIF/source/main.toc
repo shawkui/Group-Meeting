@@ -1,0 +1,13 @@
+\babel@toc {USenglish}{}
+\beamer@sectionintoc {1}{Motivation}{2}{0}{1}
+\beamer@sectionintoc {2}{Criteria of Fairness}{6}{0}{2}
+\beamer@sectionintoc {3}{Source of Unfairness}{12}{0}{3}
+\beamer@subsectionintoc {3}{1}{Bias}{14}{0}{3}
+\beamer@subsectionintoc {3}{2}{Discrimination}{21}{0}{3}
+\beamer@sectionintoc {4}{Current Methods}{24}{0}{4}
+\beamer@subsectionintoc {4}{1}{Pre-processing}{26}{0}{4}
+\beamer@subsectionintoc {4}{2}{In-processing}{35}{0}{4}
+\beamer@subsectionintoc {4}{3}{Post-processing}{47}{0}{4}
+\beamer@sectionintoc {5}{Recent \& Future Work}{49}{0}{5}
+\beamer@sectionintoc {6}{Q\& A}{54}{0}{6}
+\beamer@sectionintoc {7}{Appendix}{56}{0}{7}

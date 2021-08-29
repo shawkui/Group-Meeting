@@ -1,0 +1,760 @@
+\documentclass[10pt, xcolor=table,aspectratio=169]{beamer}
+\usepackage[square,sort,comma,numbers]{natbib}
+\usefonttheme{professionalfonts}
+% \usepackage{fourier}
+\usepackage{epigraph}
+% \beamerdefaultoverlayspecification{<+->}
+
+% input defined packages
+\input{packages/math_commands.tex}
+\input{packages/defs.tex}
+\input{packages/header.tex}
+
+\usepackage{bbm}
+
+% For line space
+\usepackage{float}
+\usepackage{setspace}
+\linespread{1.2}
+\usepackage{tabularx,ragged2e,booktabs}
+\usepackage{diagbox}
+\usepackage{ulem}
+
+% \usepackage[font=small,labelfont=bf]{caption}
+% \usepackage{subcaption}
+
+\usepackage{caption}
+\captionsetup[figure]{labelformat=empty}
+
+\usepackage{setspace}
+%\onehalfspacing
+\setlength\abovedisplayskip{0pt}
+\newcommand{\bigangle}[1]{{\langle#1\rangle}}
+
+\usepackage[USenglish]{babel}
+\usepackage[nodayofweek,level]{datetime}
+
+\newcommand{\mydate}{\formatdate{18}{06}{2020}}
+
+%\usepackage{cleveref}
+
+%% formatting
+\setbeamercovered{transparent}
+% \setbeamertemplate{theorems}[numbered]
+\setbeamertemplate{theorems}[ams style] 
+
+\mode<presentation>
+{
+\usetheme{default}
+}
+\setbeamertemplate{navigation symbols}{}
+\usecolortheme[rgb={0.13,0.28,0.59}]{structure}
+\setbeamertemplate{itemize subitem}{--}
+\setbeamertemplate{frametitle} {
+	\begin{center}
+	  {\large\bf \insertframetitle}
+	\end{center}
+}
+\setbeamerfont{block title}{size=\normalsize}
+
+\newcommand\footlineon{
+  \setbeamertemplate{footline} {
+    \begin{beamercolorbox}[ht=2.5ex,dp=1.125ex,leftskip=.8cm,rightskip=.6cm]{structure}
+      \footnotesize \insertsection
+      \hfill
+      {\insertframenumber\,/\,\inserttotalframenumber}
+    \end{beamercolorbox}
+    \vskip 0.45cm
+  }
+}
+\footlineon
+
+\AtBeginSection[] 
+{ 
+	\begin{frame}<beamer> 
+		\frametitle{Outline} 
+		\tableofcontents[currentsection,currentsubsection] 
+	\end{frame} 
+}
+
+\AtBeginSubsection[] 
+{ 
+	\begin{frame}<beamer> 
+		\frametitle{Outline} 
+		\tableofcontents[currentsection,currentsubsection] 
+	\end{frame} 
+} 
+
+
+%% begin presentation
+
+\title{\large \bfseries Bias and Fairness in Machine Learning}
+% \subtitle{Statistics, Optimization and Reinforcement Learning}
+\author{Shaokui Wei \\\href{mailto:shaokuiwei@link.cuhk.edu.cn}{shaokuiwei@link.cuhk.edu.cn}
+}
+\institute{School of Data Science\\The Chinese University of Hong Kong, Shenzhen, China}
+
+%\date{}
+
+\makeatletter
+\let\@@magyar@captionfix\relax 
+\makeatother
+
+\begin{document}
+
+\frame{
+	\thispagestyle{empty}
+	\titlepage
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Motivation}
+\begin{frame}{Motivation}
+	Examples of unfairness in Machine Learning:
+	\begin{itemize}
+		\item Unfairness in deep Abnormal Detection \cite{zhang2021towards}:
+		      \begin{figure}[t]
+			      \begin{center}
+				      \includegraphics[width=0.8\columnwidth]{./figs/abnormal.png}
+			      \end{center}
+			      \caption{The top 32 normal instances and top 32 abnormal instances
+				      discovered by deep SVDD on celebA data set are visualized. We see that the normal group is dominated by females while the abnormal
+				      group is dominated by males.}
+		      \end{figure}
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Motivation}
+	Examples of unfairness in Machine Learning:
+	\begin{itemize}
+		\item Unfairness in Correctional Offender Management Profiling for Alternative Sanctions (COMPAS) \cite{mehrabi2021survey}:
+
+		      COMPAS is more likely to have higher false positive rates for African-American offenders than Caucasian offenders in falsely predicting them to be at a higher risk of recommitting a crime or recidivism.
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Motivation}
+	Examples of unfairness in Machine Learning:
+	\begin{itemize}
+		\item  \textbf{Illustrative example:} Consider the task to recognize the presence of wearing a hat. Suppose in the real world wearing a hat is correlated with wearing glasses. This correlation may be reflected in the training data, and a classifier trained to recognize a hat may rely on the presence of glasses. Consequently, the classifier may fail to recognize a hat in the absence of glasses, and vice versa \cite{ramaswamy2021fair}.
+	\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Criteria of Fairness}
+
+\begin{frame}{Terminologys}
+	\begin{itemize}
+		\item \textbf{Favorable label}:  A label whose value corresponds to an outcome that provides an advantage to the recipient.
+		\item \textbf{Protected attribute}: An attribute that partitions a population into groups that have parity in terms of benefit received.
+		\item \textbf{Privileged value}: A privileged value of a protected attribute indicates a group that has historically been at a systematic advantage.
+		\item \textbf{Group Fairness}: Groups defined by protected attributes receive similar treatments or outcomes.
+		\item \textbf{Individual fairness}: Similar individuals receive similar treatments or outcomes.
+		\item \textbf{Fairness metric/criteria}: A quantification of unwanted bias in training data or models.
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Criteria of Fairness}
+	An algorithm is fair if it satisfies one specific criteria of fairness.
+	Many fairness criterias have been proposed over the years and most of the proposed fairness criterias are properties of the joint
+	distribution of the sensitive (projected) attribute $A$, remaining attributes $X$, the target label $Y$, and the	predicated label $\hat{Y}$. Here we assume that $Y, A\in \{0,1\}$ and give the definition of some popular criterias \cite{dunkelau2019fairness}. More criterias can be found in Section~\ref{app}.
+	\begin{definition}[Independence]
+		All groups experience the same acceptance rate.
+		$$ P(\hat{Y}=1|A=0)=P(\hat{Y}=1|A=1)$$
+	\end{definition}
+	Note: The intuition is that label is independent of certain attributes. But this criteria ignores the distribution of label in each group.
+
+\end{frame}
+
+\begin{frame}{Criteria of Fairness}
+	\begin{definition}[Separation]
+		All groups experience the same true positive rate and the same false positive rate
+		$$ P(\hat{Y}=1|A=0,Y=1)=P(\hat{Y}=1|A=1,Y=1)$$
+		$$ P(\hat{Y}=1|A=0,Y=0)=P(\hat{Y}=1|A=1,Y=0)$$
+	\end{definition}
+	\begin{definition}[Sufficiency]
+		All groups experience the same parity of positive/negative predictive values.
+		$$ P(Y=1|A=0,\hat{Y}=1)=P(Y=1|A=1,\hat{Y}=1)$$
+		$$ P(Y=1|A=0,\hat{Y}=0)=P(Y=1|A=1,\hat{Y}=0)$$
+	\end{definition}
+
+\end{frame}
+
+\begin{frame}{Criteria of Fairness}
+	In some applications it is desirable to be able to interpret the values of the score functions as probabilities.
+	\begin{definition}[Calibration]
+		Given a score function $R$, the calibration is
+		$$ P(Y=1|A=0,R=r)=P(Y=1|A=1,R=r)=r, \quad \forall r\in [0,1]$$
+	\end{definition}
+
+\end{frame}
+
+\begin{frame}{Criteria of Fairness}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/countf.png}
+		\end{center}
+		\caption{$\hat{Y}_{A\leftarrow a}(U)|X=x, A=a$ (Left) and $\hat{Y}_{A\leftarrow a'}(U)|X=x, A=a$ (Right)}
+	\end{figure}
+	\begin{definition}[Counterfactual Fairness \cite{russell2017worlds}]
+		$$ P(\hat{Y}_{A\leftarrow a}(U)|X=x, A=a)=P(\hat{Y}_{A\leftarrow a'}(U)|X=x, A=a)$$
+	\end{definition}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Source of Unfairness}
+
+\begin{frame}{Data to Algorithm}
+\begin{itemize}
+	\item In this section, we will reiterate the most important sources of bias	and discrimination summarized in \cite{mehrabi2021survey}.
+	
+\end{itemize}
+
+\end{frame}
+
+
+\subsection{Bias}
+\begin{frame}{Data to Algorithm}
+	\begin{itemize}
+		\item Measurement Bias: Measurement, or reporting bias arises from how we choose, utilize, and measure particular features.
+		\item Omitted Variable Bias: Omitted variable bias occurs when one or more important variables	are left out of the model.
+		\item Representation Bias: Representation bias arises from how we sample from a population during data collection process, e.g., lack of diversity.
+		\item Aggregation Bias: Aggregation bias (or ecological fallacy) arises when false conclusions are drawn about individuals from observing the entire population.
+
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Data to Algorithm}
+	\begin{itemize}
+		\item Sampling Bias: Sampling bias is similar to representation bias, and it arises due to non-random sampling of subgroups.
+		\item Longitudinal Data Fallacy: Researchers analyzing temporal data must use longitudinal analysis to track cohorts over time to learn their behavior.
+		\item Linking Bias: Linking bias arises when network attributes obtained from user connections, activities, or interactions differ and misrepresent the true behavior of the users.
+
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Algorithm to User}
+	\begin{itemize}
+		\item Algorithmic Bias: Algorithmic bias is when the bias is not present in the input data and is added purely by the algorithm.
+		\item User Interaction Bias: User Interaction bias is a type of bias that can not only be observant on the Web but also get triggered from two sources—the user interface and through the user itself by imposing his/her self-selected biased behavior and interaction.
+
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Algorithm to User}
+	\begin{itemize}
+		\item Popularity Bias: Items that are more popular tend to be exposed more. However, popularity metrics are subject to manipulation—for example, by fake reviews or social bots.
+		\item Emergent Bias: Emergent bias occurs as a result of use and interaction with real users. This bias arises as a result of change in population, cultural values, or societal knowledge usually some time after the completion of design.
+		\item Evaluation Bias: Evaluation bias happens during model evaluation.
+
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{User to Data}
+	\begin{itemize}
+		\item Historical Bias: Historical bias is the already existing bias and socio-technical issues in the world and can seep into from the data generation process even given a perfect sampling and feature selection.
+		\item Population Bias: Population bias arises when  statistics, demographics, representatives, and user characteristics are different in the user population of the platform from the original target population.
+		\item Self-selection Bias: Self-selection bias is a subtype of the selection or sampling bias in which subjects of the research select themselves.
+
+
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{User to Data}
+	\begin{itemize}
+		\item Social Bias: Social bias happens when others’ actions affect our judgment.
+		\item Behavioral Bias: Behavioral bias arises from different user behavior across platforms, contexts, or different dataset.
+		\item Temporal Bias: Temporal bias arises from differences in populations and behaviors over time.
+		\item Content Production Bias: Content Production bias arises from structural, lexical, semantic, and syntactic differences in the contents generated by users.
+
+	\end{itemize}
+
+\end{frame}
+
+\subsection{Discrimination}
+
+\begin{frame}{Type of Discrimination}
+	Discrimination can be considered as	a source for unfairness that is due to human prejudice and stereotyping based on the sensitive
+	attributes, which may happen intentionally or unintentionally.
+	\begin{itemize}
+		\item Explainable Discrimination: Differences in treatment and outcomes among different groups can be justified and explained via some attributes in some cases. In situations where these differences are justified and explained, it is not considered to be illegal discrimination and hence called explainable.
+		\item Unexplainable Discrimination: In contrast to explainable discrimination, there is unexplainable discrimination in which the discrimination toward a group is unjustified and therefore considered illegal.
+	\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Type of Unexplainable Discrimination}
+	\begin{itemize}
+		\item Direct Discrimination: Direct discrimination happens when protected attributes of individuals explicitly result in non-favorable outcomes toward them.
+		\item Indirect Discrimination: In indirect discrimination, individuals appear to be treated based on seemingly neutral and non-protected attributes; however, protected groups, or individuals, still get to be treated unjustly as a result of implicit effects from their protected attributes.
+	\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Current Methods}
+\begin{frame}{Overview of Methods}
+	Generally, methods that target fairness in Machine Learning fall under three categories \cite{mehrabi2021survey}:
+	\begin{itemize}
+		\item Pre-processing: Pre-processing techniques try to transform the data so the underlying discrimination/bias is removed.
+		\item In-processing: In-processing techniques try to modify and change state-of-the-art learning algorithms to remove discrimination during the model training process.
+		\item Post-processing: Post-processing is performed after training by accessing a holdout set that was not involved during the training of the model.
+	\end{itemize}
+	We consider group fair binary classification problem to demonstrate different approaches. Assume that data $X$ has the protected attribute $Z \in \{0,1\}$ and label $Y \in \{0,1\}$.
+
+\end{frame}
+
+\subsection{Pre-processing}
+\begin{frame}{Pre-processing}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/pp1m.png}
+		\end{center}
+		\caption{Overview of Pre-processing methods.}
+	\end{figure}
+
+\end{frame}
+\begin{frame}{Unbiasing Data}
+	\textbf{Relabelling (Massaging):} Take a number of individuals in the training data and change their ground truth values to ensure group fairness in dataset \cite{kamiran2009classifying}.
+	\begin{itemize}
+		\item Step 1: Compute the number $M$ of required modifications as\[			M=\eps\times \frac{|D_1|\times |D_0|}{|D_1|+|D_0|}
+		      \]
+		      where\[	\epsilon=P_1(Y=1)-P_0(Y=1) \quad D_1=\{X|Z=1\} \quad D_0=\{X|Z=0\}
+		      \]
+		\item Step 2: Sort the elements in $\{X\in D_0|Y=0\}$ in descending order and $\{X\in D_1|Y=1\}$ in ascending order by their probability to receive favorable label which is called 'rank'.
+		\item Step 3: Labels of the top-M individuals in both sets get flipped.
+
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Unbiasing Data}
+
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.3\columnwidth]{./figs/relabel.png}
+		\end{center}
+		\caption{}
+		\begin{itemize}
+			\item 	Question: What's the value of $M$?\\
+			\item 	Answer: Solve the equation:
+			      \[\frac{|D_0|\times P_0(Y=1)+M}{|D_0|}=\frac{|D_1|\times P_1(Y=1)-M}{|D_1|}
+			      \]
+			      Then,
+			      \[M=\left(P_1(Y=1)-P_0(Y=1) \right)\times \frac{|D_1|\times |D_0|}{|D_1|+|D_0|}\]
+		\end{itemize}
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Unbiasing Data}
+	\textbf{Reweighing:} Assign a weight for each data to ensure group fairness in dataset \cite{kamiran2012data}.
+	\begin{itemize}
+		\item Each individual $X$ with $Y=y, Z=z$ is assigned a weight
+		      \[W(y,z)=\frac{|\{X|Z=z\}|\times |\{X|Y=y\}|}{|D|\times |\{X|Z=z\cap Y=y\}|}\]
+	\end{itemize}
+	Note: Group fairness is achieved since
+	\[\frac{|\{X|Z=z\cap Y=y\}|W(y,z)}{|\{X|Z=z\}|}=\frac{\{|X|Y=y|\}}{|D|}\]
+
+\end{frame}
+
+\begin{frame}{Unbiasing Data}
+	\textbf{Preferential Sampling:} Duplicate or delete some data to ensure group fairness in dataset \cite{kamiran2012data}.
+	\begin{itemize}
+		\item Step 1: Let $D_z=\{(X,Y,Z)|Z=z\}$, $D^y=\{(X,Y,Z)|Y=y\}$ and $D_z^y=D_z\cap D^y$. Divide the dataset into four subsets $D_0^0, D_0^1, D_1^0$ and $D_1^1$.The expected cardinality of each subset is
+		      \[C_z^y=\frac{|D_z|\times |D^y|}{|D|}\]
+		\item Step 2: Sort subsets according to their ranks: $D_0^1, D_1^1$ ascending, $D_0^0, D_1^0$ descending.
+		\item Step 3: Adjust each subset to match their respective $C_z^y$ values by either deleting the top elements or iteratively duplicating them.
+
+	\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Fair Representations}
+	\textbf{Variational Fair Autoencoder:} Find a latent representation $\tilde{X}$
+	of X which is minimally informative about Z yet maximally informative
+	about Y \cite{louizos2015variational}.
+	\begin{itemize}
+		\item VAE: $\quad \quad \tilde{x} \sim p(\tilde{x}) \quad x\sim p_\theta(x|\tilde{x})$
+		\item Fair VAE: $\tilde{x}\sim p(\tilde{x}) \quad x\sim p_\theta(x|\tilde{x},z)$
+		\item Encourage separation between $\tilde{X}$ and Z by  encoding $Z$ into the decoder explicitly.
+		\item Avoid keeping dependencies in the variational posterior $q(\tilde{X}|X,Z)$ by employing a maximum mean discrepancy term, i.e.,
+		      \[l_{\text{MMD}}=\norm{E_{p(x|z=0)}[E_{q(\tilde{x}|x,z=0)}(\phi(\tilde{x}))]-E_{p(x|z=1)}[E_{q(\tilde{x}|x,z=1)}(\phi(\tilde{x}))]}^2\]
+		      where $\phi $ is an empirical statistic.
+	\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{Learn to Generate Fair Data}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/hat_gan.png}
+		\end{center}
+		\caption{Augment dataset using Generative Adversarial Networks (GANs) to removes the correlation between glass and hat. \cite{ramaswamy2021fair}}
+	\end{figure}
+
+
+\end{frame}
+
+\begin{frame}{Learn to Generate Fair Data}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.5\columnwidth]{./figs/gan.png}
+		\end{center}
+		\caption{Assume that the latent space is approximately linearly separable. For each latent vector $z$ sampled from the latent space of a trained GAN, we compute $z'$ such that its target attribute score  remains the same (according to $w_t$) while its protected attribute score $h_g(z')$ is negated. Hyperplane is learned by SVM.}
+	\end{figure}
+
+
+\end{frame}
+
+\subsection{In-processing}
+\begin{frame}{In-processing Methods}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=\columnwidth]{./figs/ipm.png}
+		\end{center}
+		\caption{Classification of In-Processing methods.}
+	\end{figure}
+\end{frame}
+\begin{frame}{Two Naive Bayes}
+	\begin{itemize}
+		\item Observation: Removing $Z$ from the feature set results in too big of loss in accuracy.
+		\item Let $X$ consist of m features  $X=\langle X^{(1)},\cdots,X^{(m)}\rangle$. A model that depends on $Z$ can be formulated as
+		      \[P(X,Y|Z)=P(Y|Z)\prod_{i=1}^m P(X^{(i)}|Y,Z)\]
+
+		\item \textbf{Two Naive Bayes:} Train a naive Bayes classifier for each protected attribute and balance them in order to achieve group fairness \cite{calders2010three}.
+	\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}{Prejudice Remover Regularizer}
+	\begin{itemize}
+		\item To measure prejudice, Kamishima et al. defined the (indirect) prejudice index (PI)
+		      \[\text{PI}=\sum_{Y,Z} P(Y,Z)\ln\frac{P(Y,Z)}{P(Y)P(Z)} \]
+		\item Let $\Theta$ denote the parameters of the prediction model $h$. The prejudice removing regularization term is defined as \cite{kamishima2012fairness} 
+		      \[R_{PR}(D,\Theta)=\sum_{(x,z)\in D}\sum_{y\in \{0,1\}} h(x;\Theta)\ln \frac{P(\hat{Y}=y|Z=z)}{P(\hat{Y}=y)}\]
+
+	\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Learning Fair Representations}
+	\begin{itemize}
+		\item Map input data into one of $k$ learned prototypes over which the decision takes place.
+		\item Let $C$ denote a variable representing one of the prototypes. The probabilistic mapping is defined by
+		      \[ P(C=k|X=x)=\frac{\exp(-d(x,v_k))}{\sum_{j=1}^K \exp(-d(x,v_j))}\]
+		      where $d(\cdot,\cdot)$ is a distance measure and $v_k$ is a vector associated with each prototype.
+		\item The learning system for the prototypes should minimise the loss function \[L=A_CL_C+A_XL_X+A_YL_Y\]
+		      where $A_C$, $A_X$ and $A_Y$ are hyperparameters \cite{zafar2017fairness}.
+
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Learning Fair Representations}
+	\begin{itemize}
+		\item  $L_C$, $L_X$ and $L_Y$ are defined as
+		      \begin{align*}
+			      L_C & =\sum_{k=1}^K |E(C=k|Z=1)-E(C=k|Z=0)|                            &  & \text{\% Group Fairness} \\
+			      L_X & =\sum_{(x,y,z)\in D} \left(x-\sum_{k=1}^k P(C=k|X=x)v_k\right)^2 &  & \text{\% Close to $x$}   \\
+			      L_Y & =\sum_{(x,y,z)\in D} -y\log(\hat{y})-(1-y)\log(1-\hat{y})        &  & \text{\% Accuracy}
+		      \end{align*}
+		      where $\hat{y}=\sum_{k=1}^k P(C=k|X=x)w_k$ and $w_k$ is the probabilistic outcome prediction for prototype $k$.
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Learning Fair Representations}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/LRF.png}
+		\end{center}
+		\caption{Workflow of Learning Fair Representation.}
+	\end{figure}
+	\begin{itemize}
+		\item Since $k$ is usually quite large, L-BFGS is employed to minimize the loss function.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Adversarial Learning Fair Representations}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.6\columnwidth]{./figs/ALRF.png}
+		\end{center}
+		\caption{Structure of Adversarial  Learning Fair Representation \cite{beutel2017data}.}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Adversarial Learning Fair Representations}
+	\begin{itemize}
+		\item Assume a subset $E=(X_E, Z_E, Y_E)\in D$ from which $Z$ can be observed.
+		\item The goal of the predictor model $h(g(X))$ is to correctly predict $Y$ whereas the
+		      goal of the discriminator $a(g(XE))$ is to correctly predict $Z$. The overall model’s objective is defined over two loss functions, one for $h$ and $a$ respectively
+		      \[\min \sum_{(x,y,z)\in D} L_Y(h(g(x)),y)+\sum_{(x,y,z)\in E} L_Z(a(J_\lambda (g(x))),z)\]
+		      where $J_\lambda$ is an identity function with negative gradient, i.e. $J_\lambda(g(X_E))=g(X_E)$ and $\frac{\nabla J_\lambda}{\nabla X_E}=-\lambda \frac{\nabla d(X_E)}{\nabla X_E}$. The $\lambda$ parameter determines the trade-off between accuracy and fairness .
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Adversarial Debiasing}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/ADB.png}
+		\end{center}
+		\caption{Structure of Adversarial  Debiasing \cite{zhang2018mitigating}.}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Adversarial Debiasing}
+	\begin{itemize}
+		\item Adversarial Debiasing allows for the notions of group fairness.
+		\item Assume the loss functions $L_P(\hat{y},y)$ for the predictor and $L_A(\hat{z},z)$ for the adversary, and the model parameters $W$ and $U$ for predictor and adversary respectively.
+		\item $U$ is updated according to the gradient $\nabla_UL_A$.
+		\item $W$ is updated according to
+		      \[\nabla_WL_P-\text{proj}_{\nabla_W L_A}\nabla_WL_P -\alpha \nabla_WL_A\]
+		      where $\alpha $ is a tunable hyperparameter and $\text{proj}_v=0$ if $v=0$.
+	\end{itemize}
+	Note: If $\nabla_W L_A$ is a unit vector and $\alpha=0$, this update of $W$ leads increase in accuracy but no decrease in fairness.
+\end{frame}
+
+\begin{frame}{Constraint Optimization}
+	\begin{itemize}
+		\item Given a convex decision boundary-based classifier, Zafar et al (2017) propose to minimise loss subject to posed fairness constraints  \cite{zafar2017fairness}.
+		\item Zafar et al (2017)  additionally propose a method which, rather than maximising accuracy under fairness constraints, aims to maximise fairness under accuracy constraints \cite{zafar2017fairness2}.
+		\item Andrija et al (2021) propose to solve the non-differentiable problem of Group Fairness constraints using Monte Carlo policy gradient method \cite{petrovic2021fair}.
+
+	\end{itemize}
+\end{frame}
+
+\subsection{Post-processing}
+
+\begin{frame}{Post-processing}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/ppm.png}
+		\end{center}
+		\caption{Overview of Post-processing methods.}
+	\end{figure}
+
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Recent \& Future Work}
+
+\begin{frame}{Recent works}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/heatmap.png}
+		\end{center}
+		\caption{Heatmap depicting distribution of previous work in fairness, grouped by domain and fairness definition \cite{mehrabi2021survey}.}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Recent works}
+	Current works focus on
+	\begin{itemize}
+		\item Definition of fairness.
+		\item Reveal unfairness in Machine Learning.
+		\item Achieve fairness in traditional Machine Learning with theoretical guarantee.
+		\item Achieve fairness in various deep Learning tasks.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Challenge \& Future works}
+	There are several remaining challenges to be addressed in the fairness literature \cite{mehrabi2021survey}. Among them are:
+	\begin{itemize}
+		\item Synthesizing a definition of fairness: Having a more unified fairness definition and framework can also help with the incompatibility issue of some current fairness definitions.
+		\item From Equality to Equity: The definitions presented in the literature mostly focus on equality, ensuring that each individual or group is given the same amount of resources, attention, or outcome. However, little attention has been paid to equity, which is the concept that each	 individual or group is given the resources they need to succeed.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Challenge \& Future works}
+	\begin{itemize}
+		\item Searching for Unfairness: Given a definition of fairness, it should be possible to identify instances of this unfairness in a particular dataset.
+		\item Fairness-aware Optimization in Deep Learning: A few works on adversarial learning have been made. However, fairness-aware optimization process for deep learning receives little attention.
+	\end{itemize}
+\end{frame}
+
+\section{Q\& A}
+\begin{frame}
+	\Huge{\centerline{-Q \& A-}}
+\end{frame}
+\section{Appendix}
+\label{app}
+\begin{frame}{Tools}
+	\begin{table}[]
+		\begin{tabular}{|l|l|l|l|}
+			\hline
+			Name                & Authors                         & Detection & Mitigation \\ \hline
+			Fairness Measures   & Zehlike et al., 2017            & Yes       & No         \\ \hline
+			FairML              & Adebayo, 2016                   & Yes       & No         \\ \hline
+			FairTest            & Tramer et al., 2017             & Yes       & No         \\ \hline
+			Aequitas            & Stevens et al., 2018            & Yes       & Yes        \\ \hline
+			Themis-ML           & Bantilan, 2018                  & Yes       & Yes        \\ \hline
+			Fairness Comparison & Friedler et al., 2018           & Yes       & Yes        \\ \hline
+			AF360               & Bellamy, Rachel KE, et al. 2018 & Yes       & Yes        \\ \hline
+		\end{tabular}
+		\caption{Tools for Fairness in ML.}
+	\end{table}
+\end{frame}
+
+
+\begin{frame}{Criteria of Fairness}
+	Many fairness criterias have been proposed over the years that can generally be divided into three categories:
+	\begin{itemize}
+		\item Individual Fairness: Give similar predictions to similar individuals.
+		\item Group Fairness: Treat different groups equally.
+		\item Subgroup Fairness: Subgroup fairness intends to obtain the best properties of the group	and individual notions of fairness. It is different than these notions but uses them to obtain better outcomes. It picks a group fairness constraint like equalizing false positive and asks whether this constraint holds over a large collection of subgroups.
+	\end{itemize}
+
+\end{frame}
+\begin{frame}{Criteria of Fairness}
+	Most of the proposed fairness criterias are properties of the joint distribution of the sensitive attribute A, the target label Y, and the	predicated label $\hat{Y}$. Here we assume that $Y, A\in \{0,1\}$ and give the definition of some popular measures summarized in \cite{mehrabi2021survey}.
+	\begin{definition}[Equalized Odds]
+		An algorithm is fair if
+		$$ P(\hat{Y}|A=0,Y=y)=P(\hat{Y}|A=1,Y=y)$$
+	\end{definition}
+	\begin{definition}[Equal Opportunity]
+		An algorithm is fair if
+		$$ P(\hat{Y}=1|A=0,Y=1)=P(\hat{Y}=1|A=1,Y=1)$$
+	\end{definition}
+
+\end{frame}
+
+\begin{frame}{Criteria of Fairness}
+	\begin{definition}[Demographic Parity]
+		An algorithm is fair if
+		$$ P(\hat{Y}|A=0)=P(\hat{Y}|A=1)$$
+	\end{definition}
+	\begin{definition}[Fairness through Awareness]
+		An algorithm is fair if it gives similar predictions to
+		similar individuals.
+	\end{definition}
+
+	\begin{definition}[Fairness through Unawareness]
+		An algorithm is fair as long as any protected attributes
+		A are not explicitly used in the decision-making process.
+	\end{definition}
+
+\end{frame}
+
+\begin{frame}{Criteria of Fairness}
+	\begin{definition}[Treatment Equality]
+		The ratio of false negatives and false positives is the same for both protected group categories.
+	\end{definition}
+	\begin{definition}[Test Fairness]
+		For any predicted probability score S, people in both protected and unprotected groups must have equal probability of correctly belonging to the positive class.
+	\end{definition}
+
+	\begin{definition}[Counterfactual Fairness]
+		A decision is fair towards an individual if it is the same in both the actual world and a counterfactual world where the individual belonged to a different demographic group.
+	\end{definition}
+
+\end{frame}
+
+\begin{frame}{Criteria of Fairness}
+	\begin{definition}[Fairness in Relational Domains]
+		A notion of fairness that is able to capture the
+		relational structure in a domain—not only by taking attributes of individuals into consideration
+		but by taking into account the social, organizational, and other connections between individuals.
+	\end{definition}
+	\begin{definition}[Conditional Statistical Parity]
+		People in both protected and unprotected (female and male) groups should have equal probability of being assigned to a positive outcome given a set of legitimate factors L.
+	\end{definition}
+
+\end{frame}
+\begin{frame}{Current works}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/fairness_def.png}
+		\end{center}
+		\caption{Categorizing Different Fairness Notions into Group, Subgroup, and Individual Types \cite{mehrabi2021survey}.}
+	\end{figure}
+\end{frame}
+
+
+\begin{frame}{Current Works}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.6\columnwidth]{./figs/list_mlf.png}
+		\end{center}
+		\caption{List of Papers Targeting and Talking about Bias and Fairness in Different Areas \cite{mehrabi2021survey}.}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Dataset}
+	\begin{figure}[t]
+		\begin{center}
+			\includegraphics[width=0.8\columnwidth]{./figs/dataset.png}
+		\end{center}
+		\caption{Most Widely Used Datasets in the Fairness Domain with Additional Information about Each of the Datasets Including Their Size and Area of Concentration \cite{mehrabi2021survey}.}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Dataset}
+	\begin{itemize}
+		\item FairFace \cite{karkkainen2021fairface}:  A novel face image dataset containing 108,501 images which is balanced on race.
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Procedure for Fairness Research}
+	\begin{itemize}
+		\item Identify the protected attribute and target label.
+		\item Identify the type of bias/discrimination in dataset, e.g. underrepresentation of certain group or indirect discrimination to protect attributes.
+		\item Identify the definition of fairness and criteria.
+		\item Identify the phase new methods target.
+	\end{itemize}
+
+\end{frame}
+
+%\begin{frame}
+%	\frametitle{References}
+%	\footnotesize{
+%		\begin{thebibliography}{99} % Beamer does not support BibTeX so references must be inserted manually as below
+%			\bibitem[Zhang, H. and Davidson, I., 2021]{zhang2021towards} Zhang, Hongjing and Davidson, Ian (2021)
+%			\newblock Towards Fair Deep Anomaly Detection
+%			\newblock \emph{Proceedings of the 2021 ACM Conference on Fairness, Accountability, and Transparency} 138--148.
+%
+%			\bibitem[mehrabi2021survey, 2021]{mehrabi2021survey} Mehrabi, Ninareh and Morstatter, Fred and Saxena, Nripsuta and Lerman, Kristina and Galstyan, Aram (2021)
+%			\newblock A survey on bias and fairness in machine learning
+%			\newblock \emph{ACM Computing Surveys (CSUR)} 54(6), 1--35.
+%
+%			\bibitem[barocas2017fairness, 2017]{barocas2017fairness} Barocas, Solon and Hardt, Moritz and Narayanan, Arvind (2017)
+%			\newblock Fairness in machine learning
+%			\newblock \emph{Nips tutorial} 1
+%
+%			\bibitem[bellamy2018ai, 2018]{bellamy2018ai} Bellamy, Rachel KE and Dey, Kuntal and Hind, Michael and Hoffman, Samuel C and Houde, Stephanie and Kannan, Kalapriya and Lohia, Pranay and Martino, Jacquelyn and Mehta, Sameep and Mojsilovic, Aleksandra and others (2018)
+%			\newblock AI Fairness 360: An extensible toolkit for detecting, understanding, and mitigating unwanted algorithmic bias
+%			\newblock \emph{arXiv preprint arXiv:1810.01943}
+%
+%		\end{thebibliography}
+%	}
+%\end{frame}
+
+
+\begin{frame}[t, allowframebreaks]
+\frametitle{References}
+\footnotesize
+\bibliographystyle{amsalpha}
+\bibliography{reference.bib}
+\end{frame}
+
+\end{document}
